@@ -1,0 +1,4 @@
+efipedump
+
+-i INPUT_FILE (required)
+-o OUTPUT_DIRECTORY (optional; defaults to current dir)
