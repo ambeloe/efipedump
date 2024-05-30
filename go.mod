@@ -1,4 +1,4 @@
-module efipedump
+module github.com/ambeloe/efipedump
 
 go 1.21.8
 
