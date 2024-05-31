@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/linuxboot/fiano/pkg/guid"
 	"github.com/linuxboot/fiano/pkg/uefi"
-	"strings"
 )
 
 type Executable struct {
@@ -28,7 +27,7 @@ func FileToExecutable(f *uefi.File) (*Executable, error) {
 		Version:     "UnknownVersion",
 	}
 
-	switch uefi.NamesToFileType[strings.TrimPrefix(f.Type, "EFI_FV_FILETYPE_")] {
+	switch f.Header.Type {
 	case uefi.FVFileTypeApplication:
 		exec.Type = "APP"
 	case uefi.FVFileTypeDriver:
@@ -38,16 +37,16 @@ func FileToExecutable(f *uefi.File) (*Executable, error) {
 	}
 
 	for i := 0; i < len(f.Sections); i++ {
-		switch f.Sections[i].Type {
-		case uefi.SectionTypeDXEDepEx.String():
+		switch f.Sections[i].Header.Type {
+		case uefi.SectionTypeDXEDepEx:
 			exec.Deps = f.Sections[i].DepEx
-		case uefi.SectionTypeUserInterface.String():
+		case uefi.SectionTypeUserInterface:
 			exec.Name = f.Sections[i].Name
-		case uefi.SectionTypePE32.String():
+		case uefi.SectionTypePE32:
 			exec.File = f.Sections[i].Buf()[4:]
-		case uefi.SectionTypeVersion.String():
+		case uefi.SectionTypeVersion:
 			exec.Version = f.Sections[i].Version
-		case uefi.SectionTypeCompression.String():
+		case uefi.SectionTypeCompression:
 			fmt.Printf("Compressed sections not currently supported: found in file %s\n", exec.Guid)
 			//todo: handle compressed sections
 		}

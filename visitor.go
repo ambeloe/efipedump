@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/linuxboot/fiano/pkg/guid"
 	"github.com/linuxboot/fiano/pkg/uefi"
-	"strings"
 )
 
 //var ErrUnknownFVType = errors.New("unknown file volume type")
@@ -36,7 +35,7 @@ func (p *PEE) Visit(f uefi.Firmware) error {
 	switch f.(type) {
 	case *uefi.File:
 		uf = f.(*uefi.File)
-		switch uefi.NamesToFileType[strings.TrimPrefix(uf.Type, "EFI_FV_FILETYPE_")] {
+		switch uf.Header.Type {
 		case uefi.FVFileTypeApplication, uefi.FVFileTypeDriver, uefi.FVFileTypeSMM:
 			//fmt.Println(uf.Header.GUID, uf.Header.Size)
 			if p.GUIDMap[uf.Header.GUID] == nil {
