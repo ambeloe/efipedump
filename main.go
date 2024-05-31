@@ -63,27 +63,18 @@ func rMain() int {
 		return 1
 	}
 
-	//todo: refactor/handle compressed files
-	for guid, fs := range p.GUIDMap {
+	var exec *Executable
+	for _, fs := range p.GUIDMap {
 		for i, f := range *fs {
-			name := "unknown"
-			buf := []byte{}
-			version := ""
-
-			for j := 0; j < len(f.Sections); j++ {
-				switch f.Sections[j].Type {
-				case uefi.SectionTypeUserInterface.String():
-					name = f.Sections[j].Name
-				case uefi.SectionTypePE32.String():
-					buf = f.Sections[j].Buf()[4:]
-				case uefi.SectionTypeVersion.String():
-					version = f.Sections[j].Version
-				}
+			exec, err = FileToExecutable(f)
+			if err != nil {
+				_, _ = fmt.Fprintln(os.Stderr, "error parsing executable: ", err)
+				return 1
 			}
 
-			filename := path.Join(*outDir, fmt.Sprintf("%s_%s_%s_%d.efi", name, guid, version, i))
+			filename := path.Join(*outDir, fmt.Sprintf("%s_%s_%s_%d.efi", exec.Name, exec.Guid, exec.Version, i))
 
-			err = os.WriteFile(filename, buf, 0644)
+			err = os.WriteFile(filename, exec.File, 0644)
 			if err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "error writing file %s: %v\n", filename, err)
 				return 1
