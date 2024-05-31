@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"github.com/linuxboot/fiano/pkg/guid"
 	"github.com/linuxboot/fiano/pkg/uefi"
+	"strings"
 )
 
 type Executable struct {
 	Guid guid.GUID
 	Deps []uefi.DepExOp
+	Type string
 
 	Name string
 	File []byte
@@ -24,6 +26,15 @@ func FileToExecutable(f *uefi.File) (*Executable, error) {
 		Name:        "Unknown",
 		BuildNumber: "UnknownBuild",
 		Version:     "UnknownVersion",
+	}
+
+	switch uefi.NamesToFileType[strings.TrimPrefix(f.Type, "EFI_FV_FILETYPE_")] {
+	case uefi.FVFileTypeApplication:
+		exec.Type = "APP"
+	case uefi.FVFileTypeDriver:
+		exec.Type = "DXE"
+	case uefi.FVFileTypeSMM:
+		exec.Type = "SMM"
 	}
 
 	for i := 0; i < len(f.Sections); i++ {

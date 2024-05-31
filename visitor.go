@@ -37,7 +37,7 @@ func (p *PEE) Visit(f uefi.Firmware) error {
 	case *uefi.File:
 		uf = f.(*uefi.File)
 		switch uefi.NamesToFileType[strings.TrimPrefix(uf.Type, "EFI_FV_FILETYPE_")] {
-		case uefi.FVFileTypeApplication, uefi.FVFileTypeDriver:
+		case uefi.FVFileTypeApplication, uefi.FVFileTypeDriver, uefi.FVFileTypeSMM:
 			//fmt.Println(uf.Header.GUID, uf.Header.Size)
 			if p.GUIDMap[uf.Header.GUID] == nil {
 				p.GUIDMap[uf.Header.GUID] = &[]*uefi.File{uf}

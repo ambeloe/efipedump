@@ -64,15 +64,17 @@ func rMain() int {
 	}
 
 	var exec *Executable
+	var total int
 	for _, fs := range p.GUIDMap {
 		for i, f := range *fs {
+			total++
 			exec, err = FileToExecutable(f)
 			if err != nil {
 				_, _ = fmt.Fprintln(os.Stderr, "error parsing executable: ", err)
 				return 1
 			}
 
-			filename := path.Join(*outDir, fmt.Sprintf("%s_%s_%s_%d.efi", exec.Name, exec.Guid, exec.Version, i))
+			filename := path.Join(*outDir, fmt.Sprintf("%s_%s_%s_%s_%d.efi", exec.Name, exec.Type, exec.Guid, exec.Version, i))
 
 			err = os.WriteFile(filename, exec.File, 0644)
 			if err != nil {
@@ -81,6 +83,7 @@ func rMain() int {
 			}
 		}
 	}
+	fmt.Printf("Extracted %d unique executables; %d total\n", total, p.PECount)
 
 	return 0
 }
