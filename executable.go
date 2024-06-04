@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"github.com/ambeloe/efipedump/eficompress"
 	"github.com/linuxboot/fiano/pkg/guid"
 	"github.com/linuxboot/fiano/pkg/uefi"
@@ -126,14 +125,14 @@ func bufToSections(buf []byte) ([]*uefi.Section, error) {
 		secs = append(secs, sec)
 
 		fileOrder++
-		fmt.Printf("%X ", off)
+		//fmt.Printf("%X ", off)
 		_, secLen, err = sectionInfo(buf[off:])
 		if err != nil {
 			return nil, err
 		}
 		off += uint(secLen)
 		off += off % 4
-		fmt.Printf("%X + %X -> %X\n", off-uint(secLen), secLen, off)
+		//fmt.Printf("%X + %X -> %X\n", off-uint(secLen), secLen, off)
 	}
 
 	return secs, err
