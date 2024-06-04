@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"github.com/ambeloe/efipedump/eficompress"
 	"github.com/linuxboot/fiano/pkg/guid"
 	"github.com/linuxboot/fiano/pkg/uefi"
 	"strconv"
 	"unsafe"
 )
+
+var ErrUnknownCompression = errors.New("section compressed with unknown algorithm")
 
 type Executable struct {
 	Guid guid.GUID
@@ -78,9 +81,16 @@ func handleSections(exec *Executable, s []*uefi.Section) error {
 				return err
 			}
 
-			decompressed, err = eficompress.DecompressEFI(s[i].Buf()[off+5:], false)
-			if err != nil {
-				return err
+			switch s[i].Buf()[off+4] {
+			case 0:
+				decompressed = s[i].Buf()[off+5:]
+			case 1:
+				decompressed, err = eficompress.DecompressEFI(s[i].Buf()[off+5:], false)
+				if err != nil {
+					return err
+				}
+			default:
+				return ErrUnknownCompression
 			}
 
 			secs, err = bufToSections(decompressed)
@@ -100,26 +110,30 @@ func handleSections(exec *Executable, s []*uefi.Section) error {
 
 func bufToSections(buf []byte) ([]*uefi.Section, error) {
 	var err error
-	var off int
+	var off uint
 	var secLen uint32
 	var fileOrder int
 	var sec *uefi.Section
 	var secs = make([]*uefi.Section, 0, 3)
 
-	for off < len(buf) {
+	for off < uint(len(buf)) {
 		sec, err = uefi.NewSection(buf[off:], fileOrder)
 		if err != nil {
+			//os.WriteFile(fmt.Sprintf("wtf_%x_erroffset_%x.bin", len(buf), off), buf, 0644)
 			return nil, err
 		}
 
 		secs = append(secs, sec)
 
 		fileOrder++
+		fmt.Printf("%X ", off)
 		_, secLen, err = sectionInfo(buf[off:])
 		if err != nil {
 			return nil, err
 		}
-		off += int(secLen) + 1
+		off += uint(secLen)
+		off += off % 4
+		fmt.Printf("%X + %X -> %X\n", off-uint(secLen), secLen, off)
 	}
 
 	return secs, err

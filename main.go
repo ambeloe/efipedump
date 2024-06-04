@@ -36,7 +36,7 @@ func rMain() int {
 	} else {
 		file, err = os.ReadFile(*inFile)
 		if err != nil {
-			_, _ = fmt.Fprintln(os.Stderr, "error reading input file: ", err)
+			_, _ = fmt.Fprintln(os.Stderr, "error reading input file:", err)
 			return 1
 		}
 	}
@@ -44,14 +44,14 @@ func rMain() int {
 	if *outDir != "" {
 		err = os.MkdirAll(*outDir, 0750)
 		if err != nil {
-			_, _ = fmt.Fprintln(os.Stderr, "error creating output directory: ", err)
+			_, _ = fmt.Fprintln(os.Stderr, "error creating output directory:", err)
 			return 1
 		}
 	}
 
 	fw, err = uefi.Parse(file)
 	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, "error parsing efi image: ", err)
+		_, _ = fmt.Fprintln(os.Stderr, "error parsing efi image:", err)
 		return 1
 	}
 
@@ -59,7 +59,7 @@ func rMain() int {
 
 	err = p.Run(fw)
 	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, "error running parser on firmware: ", err)
+		_, _ = fmt.Fprintln(os.Stderr, "error running parser on firmware:", err)
 		return 1
 	}
 
@@ -70,7 +70,7 @@ func rMain() int {
 			total++
 			exec, err = FileToExecutable(f)
 			if err != nil {
-				_, _ = fmt.Fprintln(os.Stderr, "error parsing executable: ", err)
+				_, _ = fmt.Fprintln(os.Stderr, "error parsing executable:", err)
 				return 1
 			}
 
