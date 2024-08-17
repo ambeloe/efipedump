@@ -36,7 +36,7 @@ func (p *PEE) Visit(f uefi.Firmware) error {
 	case *uefi.File:
 		uf = f.(*uefi.File)
 		switch uf.Header.Type {
-		case uefi.FVFileTypeApplication, uefi.FVFileTypeDriver, uefi.FVFileTypeSMM:
+		case uefi.FVFileTypeApplication, uefi.FVFileTypeDriver, uefi.FVFileTypeSMM, uefi.FVFileTypePEIM:
 			//fmt.Println(uf.Header.GUID, uf.Header.Size)
 			if p.GUIDMap[uf.Header.GUID] == nil {
 				p.GUIDMap[uf.Header.GUID] = &[]*uefi.File{uf}
@@ -66,6 +66,7 @@ func (p *PEE) dedupFiles() {
 			t := make([]*uefi.File, len(temp))
 			for _, j := range temp {
 				t[i] = (*f)[j]
+				i++
 			}
 			dd[g] = &t
 		} else {
